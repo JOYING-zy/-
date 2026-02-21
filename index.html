@@ -118,13 +118,15 @@ document.addEventListener("keydown", function(e){
   const trialType =
     lastRule===null ? "start" :
     lastRule===t.rule ? "repeat" : "switch";
+  const correct = e.key === t.correctKey;
+
   data.push({
     trial: current+1,
     phase: current<PRACTICE?"practice":"test",
     rule: t.rule,
     trial_type: trialType,
     rt: rt,
-    correct: e.key===t.correctKey
+    correct: correct
   });
 
   // —— 每个 trial 立刻上传到 Google Sheet ——
