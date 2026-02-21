@@ -41,6 +41,7 @@ body {
 <script>
 /************ 被试编号 ************/
 const pid = "P_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw9o_kGSqXs0Sksdir9ClLglG3b0dkDjHwwbeQRWskX21PZdyshuu9fVLA4bYUqZnd0/exec";
 
 /************ 参数 ************/
 const PRACTICE = 8;
@@ -125,6 +126,18 @@ document.addEventListener("keydown", function(e){
     rt: rt,
     correct: e.key===t.correctKey
   });
+
+  // —— 每个 trial 立刻上传到 Google Sheet ——
+const img = new Image();
+img.src =
+  SCRIPT_URL +
+  "?pid=" + pid +
+  "&trial=" + (current + 1) +
+  "&phase=" + (current < PRACTICE ? "practice" : "test") +
+  "&rule=" + t.rule +
+  "&trial_type=" + trialType +
+  "&rt=" + rt +
+  "&correct=" + correct;
   lastRule = t.rule;
   nextTrial();
 });
@@ -132,25 +145,6 @@ document.addEventListener("keydown", function(e){
 /************ 结束 & 上传 ************/
 function endTask(){
   document.getElementById("stimulus").innerHTML = "";
-  uploadData();
-}
-
-function uploadData(){
-  const payload = encodeURIComponent(JSON.stringify(data.map(d => ({
-    pid: pid,
-    trial: d.trial,
-    phase: d.phase,
-    rule: d.rule,
-    trial_type: d.trial_type,
-    rt: d.rt,
-    correct: d.correct
-  }))));
-
-  const img = new Image();
-  img.src =
-    "https://script.google.com/macros/s/AKfycbw9o_kGSqXs0Sksdir9ClLglG3b0dkDjHwwbeQRWskX21PZdyshuu9fVLA4bYUqZnd0/exec"
-    + "?data=" + payload;
-
   document.getElementById("cue").innerHTML =
     "<strong>任务结束，感谢参与！</strong><br><br>请关闭页面";
 }
