@@ -179,7 +179,29 @@ function endTask(){
 
   document.getElementById("stimulus").innerHTML = "";
 
-  uploadData();
+  function uploadData(){
+  const payload = JSON.stringify(data.map(d => ({
+    pid: pid,
+    trial: d.trial,
+    phase: d.phase,
+    rule: d.rule,
+    trial_type: d.trial_type,
+    rt: d.rt,
+    correct: d.correct
+  })));
+
+  // 不再判断成功 / 失败
+  fetch("https://script.google.com/macros/s/AKfycbw9o_kGSqXs0Sksdir9ClLglG3b0dkDjHwwbeQRWskX21PZdyshuu9fVLA4bYUqZnd0/exec", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: "data=" + encodeURIComponent(payload)
+  });
+
+  // 无论 fetch 怎么判，页面都结束
+  document.getElementById("cue").innerHTML =
+    "<strong>任务结束，感谢参与！</strong><br><br>请关闭页面";
 }
 
 function downloadData(){
