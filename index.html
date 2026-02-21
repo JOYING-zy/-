@@ -60,6 +60,7 @@ button {
 <div id="stimulus"></div>
 
 <script>
+const pid = "P_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
 /**************** 参数（最终版：8 + 32） ****************/
 const PRACTICE = 8;
 const TEST = 32;
@@ -178,7 +179,7 @@ function endTask(){
 
   document.getElementById("stimulus").innerHTML = "";
 
-  downloadData();
+  uploadData();
 }
 
 function downloadData(){
@@ -192,6 +193,33 @@ function downloadData(){
   a.href = URL.createObjectURL(blob);
   a.download = "switch_cost_data.csv";
   a.click();
+}
+  
+  function uploadData(){
+  const payload = data.map(d => ({
+    pid: pid,
+    trial: d.trial,
+    phase: d.phase,
+    rule: d.rule,
+    trial_type: d.trial_type,
+    rt: d.rt,
+    correct: d.correct
+  }));
+
+  fetch("https://script.google.com/macros/s/AKfycbzD7zPJ50draG2hLEImTCh1b859gmhI2YJ4w0V5nT5NHaoUkbvJCNs3C229JxYiEDo/exec", {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  .then(res => res.json())
+  .then(res => {
+    document.getElementById("cue").innerHTML += "<br><br>✅ 数据已成功上传";
+  })
+  .catch(err => {
+    document.getElementById("cue").innerHTML += "<br><br>❌ 数据上传失败";
+  });
 }
 </script>
 
