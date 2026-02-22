@@ -151,8 +151,14 @@ function nextTrial(){
 /************ 结束 ************/
 function endTask(){
   document.getElementById("stimulus").innerHTML = "";
+
   document.getElementById("cue").innerHTML =
-    "<strong>任务结束，感谢参与！</strong><br><br>请关闭页面";
+    "<strong>任务结束，感谢参与！</strong><br><br>" +
+    "请复制以下【任务编号】，并返回问卷填写：<br><br>" +
+    "<div style='font-size:22px; font-weight:bold; color:#c0392b;'>" +
+    pid +
+    "</div><br>" +
+    "⚠️ 请务必完整复制，否则数据将无法匹配。";
 }
 </script>
 
