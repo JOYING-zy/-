@@ -185,17 +185,12 @@ function endTask(){
   const switchCost = switchRT - repeatRT;
 
   document.getElementById("cue").innerHTML =
-    "<strong>任务结束</strong><br><br>" +
+"任务结束，请复制下面这一行并返回问卷：<br><br>" +
 
-    "任务编号: <strong>"+pid+"</strong><br><br>" +
-
-    "Accuracy: "+accuracy+"%<br><br>" +
-
-    "Switch RT: "+switchRT+" ms<br>" +
-    "Repeat RT: "+repeatRT+" ms<br>" +
-    "Switch Cost: "+switchCost+" ms<br><br>" +
-
-    "请复制以上数据并返回问卷填写";
+"<div style='font-size:24px;font-weight:bold;color:#c0392b'>" +
+pid + "," + accuracy + "," + switchRT + "," + repeatRT + "," + switchCost +
+"</div>";
+    "请一定复制以上数据并返回问卷填写";
 }
 
 </script>
