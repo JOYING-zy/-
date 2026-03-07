@@ -39,9 +39,9 @@ body {
 <div id="stimulus"></div>
 
 <script>
+
 /************ 基本参数 ************/
 const pid = "P_" + Date.now() + "_" + Math.floor(Math.random()*1000);
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-JuNYBP-En1TFn52eqI0MizZEMi7DgcWJ5t_0iIU/dev";
 
 const PRACTICE = 8;
 const TEST = 32;
@@ -55,10 +55,18 @@ let lastRule = null;
 let startTime = 0;
 let started = false;
 
+/************ 数据统计 ************/
+let testTrials = [];
+let correctCount = 0;
+let totalTest = 0;
+let switchRTs = [];
+let repeatRTs = [];
+
 /************ 生成规则 ************/
 function generateRules(n){
   let rules = [];
   let rule = Math.random() < 0.5 ? "color" : "shape";
+
   for(let i=0;i<n;i++){
     if(Math.random() >= 0.5){
       rule = rule === "color" ? "shape" : "color";
@@ -72,10 +80,12 @@ function generateRules(n){
 function makeTrial(rule){
   const color = Math.random() < 0.5 ? "red" : "blue";
   const shape = Math.random() < 0.5 ? "circle" : "square";
+
   const correctKey =
     rule === "color"
       ? (color === "red" ? LEFT : RIGHT)
       : (shape === "circle" ? LEFT : RIGHT);
+
   return {rule, color, shape, correctKey};
 }
 
@@ -88,10 +98,9 @@ document.getElementById("cue").innerHTML =
   "形状判断：圆形 (F) ｜ 方形 (J)<br><br>" +
   "请又快又准作答<br><br><strong>按 F 或 J 开始</strong>";
 
-/************ 唯一的键盘监听 ************/
+/************ 键盘监听 ************/
 document.addEventListener("keydown", function(e){
 
-  /* —— 启动任务 —— */
   if(!started){
     if(e.key === LEFT || e.key === RIGHT){
       started = true;
@@ -100,36 +109,46 @@ document.addEventListener("keydown", function(e){
     return;
   }
 
-  /* —— 正式作答 —— */
   if(e.key !== LEFT && e.key !== RIGHT) return;
   if(current < 0 || current >= trials.length) return;
 
   const rt = Math.round(performance.now() - startTime);
   const t = trials[current];
+
   const trialType =
     lastRule === null ? "start" :
     lastRule === t.rule ? "repeat" : "switch";
+
   const correct = e.key === t.correctKey;
 
-  /* 上传一行数据 */
-  const img = new Image();
-  img.src =
-    SCRIPT_URL +
-    "?pid=" + pid +
-    "&trial=" + (current + 1) +
-    "&phase=" + (current < PRACTICE ? "practice" : "test") +
-    "&rule=" + t.rule +
-    "&trial_type=" + trialType +
-    "&rt=" + rt +
-    "&correct=" + correct;
+  /************ 只记录正式实验 ************/
+  if(current >= PRACTICE){
+
+    totalTest++;
+
+    if(correct) correctCount++;
+
+    if(correct){ 
+      if(trialType === "switch"){
+        switchRTs.push(rt);
+      }
+      if(trialType === "repeat"){
+        repeatRTs.push(rt);
+      }
+    }
+
+  }
 
   lastRule = t.rule;
+
   nextTrial();
 });
 
 /************ 下一题 ************/
 function nextTrial(){
+
   current++;
+
   if(current >= trials.length){
     endTask();
     return;
@@ -148,18 +167,37 @@ function nextTrial(){
   startTime = performance.now();
 }
 
+/************ 平均值函数 ************/
+function mean(arr){
+  if(arr.length === 0) return 0;
+  return Math.round(arr.reduce((a,b)=>a+b)/arr.length);
+}
+
 /************ 结束 ************/
 function endTask(){
+
   document.getElementById("stimulus").innerHTML = "";
 
+  const accuracy = Math.round(correctCount / totalTest * 100);
+
+  const switchRT = mean(switchRTs);
+  const repeatRT = mean(repeatRTs);
+  const switchCost = switchRT - repeatRT;
+
   document.getElementById("cue").innerHTML =
-    "<strong>任务结束，感谢参与！</strong><br><br>" +
-    "请复制以下【任务编号】，并返回问卷填写：<br><br>" +
-    "<div style='font-size:22px; font-weight:bold; color:#c0392b;'>" +
-    pid +
-    "</div><br>" +
-    "⚠️ 请务必完整复制，否则数据将无法匹配。";
+    "<strong>任务结束</strong><br><br>" +
+
+    "任务编号: <strong>"+pid+"</strong><br><br>" +
+
+    "Accuracy: "+accuracy+"%<br><br>" +
+
+    "Switch RT: "+switchRT+" ms<br>" +
+    "Repeat RT: "+repeatRT+" ms<br>" +
+    "Switch Cost: "+switchCost+" ms<br><br>" +
+
+    "请复制以上数据并返回问卷填写";
 }
+
 </script>
 
 </body>
